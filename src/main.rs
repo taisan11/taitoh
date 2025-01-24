@@ -1,15 +1,19 @@
 use tokio::net::TcpListener;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use env_logger::Env;
+use log::info;
 mod logger;
+mod config_loader;
 
 const SERVER_ADDRESS: &str = "127.0.0.1:8888";
 
 #[tokio::main]
 async fn main() {
+    // config_loader::init_config("config.json").unwrap();
+    // env_logger::init_from_env(Env::default().default_filter_or(config_loader::get_config().unwrap().log_level.clone()));
     env_logger::init_from_env(Env::default().default_filter_or("info"));
     // HTTPサーバを起動
-    println!("[HTTPサーバを起動] http://{}", SERVER_ADDRESS);
+    info!("[Start Server] http://{}", SERVER_ADDRESS);
     let listener = TcpListener::bind(SERVER_ADDRESS).await.unwrap();
 
     // Ctrl+Cシグナルを待ち受ける
@@ -27,7 +31,7 @@ async fn main() {
             }
         } => {},
         _ = signal => {
-            println!("Ctrl+Cが押されました。サーバをシャットダウンします。");
+            info!("Server is shutting down");
         },
     }
 }
