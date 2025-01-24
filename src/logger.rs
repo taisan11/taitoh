@@ -4,6 +4,7 @@ use std::io::Write;
 
 const LOG_FILE: &str = "log.txt";
 
+#[cfg(feature = "access-log")]
 pub fn logger(message: &str) {
     info!("{}", message);
     let mut file = OpenOptions::new()
@@ -12,4 +13,9 @@ pub fn logger(message: &str) {
         .open(LOG_FILE)
         .unwrap();
     writeln!(file, "{}", message).unwrap();
+}
+
+#[cfg(not(feature = "access-log"))]
+pub fn logger(_message: &str) {
+    // ロギングをスキップ
 }

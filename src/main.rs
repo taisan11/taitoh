@@ -1,6 +1,3 @@
-use std::fs::File;
-use std::io::prelude::*;
-use std::path::Path;
 use tokio::net::TcpListener;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use env_logger::Env;
@@ -23,7 +20,6 @@ async fn main() {
         _ = async {
             loop {
                 let (stream, _) = listener.accept().await.unwrap();
-                // println!("クライアントが接続しました。");
                 // クライアントとの通信を行う
                 tokio::spawn(async move {
                     handle_client(stream).await;
@@ -41,7 +37,7 @@ async fn handle_client(mut stream: tokio::net::TcpStream) {
     let mut request_buf = [0; 4096];
     let size = stream.read(&mut request_buf).await.unwrap();
     let request = String::from_utf8_lossy(&request_buf[..size]);
-    // logger::logger(&request);
+    logger::logger(&request);
 
     // リクエストのパスを解析
     let request_line = request.lines().next().unwrap();
@@ -52,10 +48,8 @@ async fn handle_client(mut stream: tokio::net::TcpStream) {
         format!("{}.html", &path[1..])
     };
 
-    let response = if Path::new(&file_path).exists() {
-        let mut file = File::open(file_path).unwrap();
-        let mut contents = String::new();
-        file.read_to_string(&mut contents).unwrap();
+    let response = if tokio::fs::metadata(&file_path).await.is_ok() {
+        let contents = tokio::fs::read_to_string(file_path).await.unwrap();
         format!("HTTP/1.1 200 OK\r\n\r\n{}", contents)
     } else {
         "HTTP/1.1 404 NOT FOUND\r\n\r\n<h1>404 Not Found</h1>".to_string()

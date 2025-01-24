@@ -13,3 +13,11 @@ opt-level = 1
 
 [profile.dev.package."*"]
 opt-level = 3
+
+[profile.release]
+opt-level = 3
+debug = false
+
+[features]
+default = ["access-log"] # デフォルトではロギングを有効化
+access-log = []          # ロギング機能をオプション化
