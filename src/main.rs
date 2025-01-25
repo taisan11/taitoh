@@ -5,16 +5,15 @@ use log::info;
 mod logger;
 mod config_loader;
 
-const SERVER_ADDRESS: &str = "127.0.0.1:8888";
 
 #[tokio::main]
 async fn main() {
-    // config_loader::init_config("config.json").unwrap();
-    // env_logger::init_from_env(Env::default().default_filter_or(config_loader::get_config().unwrap().log_level.clone()));
-    env_logger::init_from_env(Env::default().default_filter_or("info"));
+    config_loader::init_config("./config.json").unwrap();
+    env_logger::init_from_env(Env::default().default_filter_or(config_loader::get_config().unwrap().log_level.clone()));
+    let server_address = config_loader::get_config().unwrap().addr.clone();
     // HTTPサーバを起動
-    info!("[Start Server] http://{}", SERVER_ADDRESS);
-    let listener = TcpListener::bind(SERVER_ADDRESS).await.unwrap();
+    let listener = TcpListener::bind(&server_address).await.unwrap();
+    info!("[Start Server] http://{}", server_address);
 
     // Ctrl+Cシグナルを待ち受ける
     let signal = tokio::signal::ctrl_c();
